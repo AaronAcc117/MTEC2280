@@ -3,75 +3,63 @@
 //A Lamp using Potentiometer & Button with Arduino
 
 // Pins 
-const int potPin = A0;       // Potentiometer Input
-const int buttonPin = 2;     // Button Input
-const int ledPin = 9;        // PWM LED Output
-const int buzzerPin = 3;     // Buzzer Output
-const int redPin = 5, greenPin = 10, bluePin = 11;  LED
 
-// Variables I need
-int potValue = 0;
-int brightness = 0;
+#define LED1_PIN 5
+#define LED2_PIN 10
+#define LED3_PIN 11
+#define BUTTON_PIN 2
+#define POT_PIN 9
+
 int buttonState = 0;
 int lastButtonState = 0;
-bool mode = 0;  
-unsigned long lastDebounceTime = 0; // Stores last time button state changed and there is delay
-const long debounceDelay = 50;
-
-// Red green and blue Colors array 
-int colors[][3] = {
-    {255, 0, 0},   // Red
-    {0, 255, 0},   // Green
-    {0, 0, 255},   // Blue
-    {255, 0, 0},   // Red
-    {0, 255, 0},   // Green
-    {0, 0, 255}    // Blue
-};
-int colorIndex = 0;
-
+bool ledsOn = true;
 
 void setup() {
-    pinMode(buttonPin, INPUT_PULLUP);
-    pinMode(ledPin, OUTPUT);
-    pinMode(buzzerPin, OUTPUT);
-    pinMode(redPin, OUTPUT);
-    pinMode(greenPin, OUTPUT);
-    pinMode(bluePin, OUTPUT);
-    Serial.begin(9600);
+  
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(LED2_PIN, OUTPUT);
+  pinMode(LED3_PIN, OUTPUT);
+
+  
+  pinMode(BUTTON_PIN, INPUT);
+
+  
+  Serial.begin(115200);
 }
 
 void loop() {
-    // Reads the  potentiometer value and maps  brightness
-    potValue = analogRead(potPin);
-    brightness = map(potValue, 0, 1023, 0, 255);
-    analogWrite(ledPin, brightness);
+  //  the button state
+  buttonState = digitalRead(BUTTON_PIN);
 
-    // Button 
-    int reading = digitalRead(buttonPin);
-    if (reading != lastButtonState) {
-        lastDebounceTime = millis();
-    }
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (reading == LOW && buttonState == HIGH) {
-            mode = !mode;
-            digitalWrite(buzzerPin, HIGH);
-            delay(100);
-            digitalWrite(buzzerPin, LOW);
-        }
-    }
-    buttonState = reading;
+  // Check if the button is pressed
+  if (buttonState == HIGH && lastButtonState == LOW) {
+    // Toggle the LED state
+    ledsOn = !ledsOn;
+    delay(200); //delay
+  }
 
-    // The LED Lighting 
-    if (mode == 0) {
-        analogWrite(redPin, brightness);
-        analogWrite(greenPin, brightness);
-        analogWrite(bluePin, brightness);
-    } else {
-        colorIndex = (millis() / 1000) % 6;
-        analogWrite(redPin, colors[colorIndex][0]);
-        analogWrite(greenPin, colors[colorIndex][1]);
-        analogWrite(bluePin, colors[colorIndex][2]);
-    }
+  // Update the last button state
+  lastButtonState = buttonState;
+
+  // If LEDs are on, this adjusts brightness based on potentiometer
+  if (ledsOn) {
     
-    lastButtonState = reading;
+    int potValue = analogRead(POT_PIN);
+
+    
+    int brightness = map(potValue, 0, 1023, 0, 255);
+
+    // brightness for all LEDs
+    analogWrite(LED1_PIN, brightness);
+    analogWrite(LED2_PIN, brightness);
+    analogWrite(LED3_PIN, brightness);
+  } else {
+    // Turn off the LEDs if they're supposed to be off
+    digitalWrite(LED1_PIN, LOW);
+    digitalWrite(LED2_PIN, LOW);
+    digitalWrite(LED3_PIN, LOW);
+  }
+
+  // Small delay for stability
+  delay(10);
 }
