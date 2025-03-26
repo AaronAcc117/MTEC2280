@@ -1,77 +1,35 @@
 //Aaron Sanchez
 // My Midterm Work In Progress 
-//A Lamp using Potentiometer & Button with Arduino
+//A Lamp using Potentiometer
 
-// Pins 
-const int potPin = A0;       // Potentiometer Input
-const int buttonPin = 2;     // Button Input
-const int ledPin = 9;        // PWM LED Output
-const int buzzerPin = 3;     // Buzzer Output
-const int redPin = 5, greenPin = 10, bluePin = 11;  LED
-
-// Variables I need
-int potValue = 0;
-int brightness = 0;
-int buttonState = 0;
-int lastButtonState = 0;
-bool mode = 0;  
-unsigned long lastDebounceTime = 0; // Stores last time button state changed and there is delay
-const long debounceDelay = 50;
-
-// Red green and blue Colors array 
-int colors[][3] = {
-    {255, 0, 0},   // Red
-    {0, 255, 0},   // Green
-    {0, 0, 255},   // Blue
-    {255, 0, 0},   // Red
-    {0, 255, 0},   // Green
-    {0, 0, 255}    // Blue
-};
-int colorIndex = 0;
-
+const int led1 = 15, led2 = 6, led3 = 7, buzzer = 9, button = 4, pot = 8;
 
 void setup() {
-    pinMode(buttonPin, INPUT_PULLUP);
-    pinMode(ledPin, OUTPUT);
-    pinMode(buzzerPin, OUTPUT);
-    pinMode(redPin, OUTPUT);
-    pinMode(greenPin, OUTPUT);
-    pinMode(bluePin, OUTPUT);
-    Serial.begin(9600);
+    pinMode(led1, OUTPUT);
+    pinMode(led2, OUTPUT);
+    pinMode(led3, OUTPUT);
+    pinMode(buzzer, OUTPUT);
+    pinMode(button, INPUT_PULLUP);
+}
+
+void playTone(int frequency, int duration) {
+    tone(buzzer, frequency, duration);
+    delay(duration);
 }
 
 void loop() {
-    // Reads the  potentiometer value and maps  brightness
-    potValue = analogRead(potPin);
-    brightness = map(potValue, 0, 1023, 0, 255);
-    analogWrite(ledPin, brightness);
-
-    // Button 
-    int reading = digitalRead(buttonPin);
-    if (reading != lastButtonState) {
-        lastDebounceTime = millis();
-    }
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (reading == LOW && buttonState == HIGH) {
-            mode = !mode;
-            digitalWrite(buzzerPin, HIGH);
-            delay(100);
-            digitalWrite(buzzerPin, LOW);
-        }
-    }
-    buttonState = reading;
-
-    // The LED Lighting 
-    if (mode == 0) {
-        analogWrite(redPin, brightness);
-        analogWrite(greenPin, brightness);
-        analogWrite(bluePin, brightness);
-    } else {
-        colorIndex = (millis() / 1000) % 6;
-        analogWrite(redPin, colors[colorIndex][0]);
-        analogWrite(greenPin, colors[colorIndex][1]);
-        analogWrite(bluePin, colors[colorIndex][2]);
-    }
+    int brightness = analogRead(pot) / 16;
+    digitalWrite(led1, HIGH);
+    delay(200);
+    digitalWrite(led1, LOW);
+    digitalWrite(led2, HIGH);
+    delay(200);
+    digitalWrite(led2, LOW);
+    digitalWrite(led3, HIGH);
+    delay(200);
+    digitalWrite(led3, LOW);
     
-    lastButtonState = reading;
+    playTone(440, 300);
+    playTone(494, 300);
+    playTone(523, 300);
 }
